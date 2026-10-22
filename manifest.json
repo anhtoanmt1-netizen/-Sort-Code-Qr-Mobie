@@ -1,0 +1,19 @@
+{
+  "name": "SPX QR Data Entry",
+  "short_name": "SPX QR",
+  "description": "Quét QR, tra cứu Ward và xuất Excel",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f6fb",
+  "theme_color": "#073763",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

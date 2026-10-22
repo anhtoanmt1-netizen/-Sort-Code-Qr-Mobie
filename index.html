@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#073763">
+<meta name="description" content="Ứng dụng quét QR, nhập mã vận đơn và tra cứu Ward, Hub, Sort Code.">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<title>SPX • QR Data Entry</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<style>
+:root{--orange:#EE4E2C;--navy:#073763;--bg:#f3f6fb;--card:#fff;--text:#172337;--muted:#64748b;--line:#dce4ef;--good:#16865b;--bad:#c62828;--shadow:0 8px 28px rgba(7,55,99,.09)}
+[data-theme="dark"]{--bg:#0d1726;--card:#142236;--text:#edf4ff;--muted:#a6b6cc;--line:#2b4059;--shadow:0 8px 28px rgba(0,0,0,.24)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:11px 14px;font-weight:750;transition:transform .15s,filter .15s}button:active{transform:scale(.98)}button:disabled{opacity:.5;cursor:not-allowed}
+.primary{background:var(--orange);color:#fff}.secondary{background:var(--navy);color:#fff}.soft{background:color-mix(in srgb,var(--navy) 9%,var(--card));color:var(--text);border:1px solid var(--line)}.danger{background:#fff0ef;color:#b42318;border:1px solid #ffd1cb}.small{padding:7px 10px;border-radius:9px;font-size:12px}
+header{background:linear-gradient(120deg,var(--navy),#0b4b7e);color:white;padding:17px max(16px,calc((100% - 1100px)/2));box-shadow:0 5px 18px #07376322}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1100px;margin:auto}.brand{display:flex;align-items:center;gap:11px}.logo{width:42px;height:42px;border-radius:13px;background:var(--orange);display:grid;place-items:center;font-size:21px;font-weight:900}.brand h1{font-size:18px;line-height:1.2;margin:0}.brand p{margin:4px 0 0;color:#c8d9ec;font-size:12px}.top-actions{display:flex;align-items:center;gap:8px}.clock{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px;color:#e8f1fa}
+main{max-width:1100px;margin:18px auto;padding:0 14px 40px}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.panel h2{font-size:16px;margin:0}.sub{font-size:12px;color:var(--muted);margin:4px 0 0}.toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field label{font-size:12px;font-weight:800;color:var(--muted)}input,select{width:100%;min-width:0;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:11px;padding:11px 12px;outline:none}input:focus,select:focus{border-color:var(--orange);box-shadow:0 0 0 3px #ee4e2c20}.province-field{flex:1;min-width:190px}.data-status{font-size:12px;color:var(--muted);padding:8px 10px;border-radius:10px;background:var(--bg)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}.stat{padding:11px 12px;background:var(--bg);border:1px solid var(--line);border-radius:13px}.stat strong{display:block;font-size:21px;color:var(--orange);font-variant-numeric:tabular-nums}.stat span{font-size:11px;color:var(--muted)}
+.rows{display:flex;flex-direction:column;gap:11px}.entry{border:1px solid var(--line);border-radius:15px;padding:12px;background:var(--card);position:relative}.entry.duplicate{border-color:#e5484d;box-shadow:0 0 0 2px #e5484d16}.entry-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}.entry-num{font-weight:850;font-size:12px;color:var(--muted)}.entry-grid{display:grid;grid-template-columns:1.15fr 1.2fr 1.1fr .85fr;gap:9px}.field-title{display:flex;justify-content:space-between;gap:5px;align-items:center}.scan-btn,.mic-btn{background:var(--bg);border:1px solid var(--line);color:var(--navy);padding:6px 8px;font-size:12px}.ward-wrap{position:relative}.suggestions{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 3px);background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:10px;max-height:210px;overflow:auto}.suggestion{padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--line);font-size:13px}.suggestion:last-child{border:0}.suggestion:hover,.suggestion:focus{background:color-mix(in srgb,var(--orange) 10%,var(--card))}.statusline{font-size:11px;min-height:17px;margin-top:4px;color:var(--muted)}.statusline.error{color:var(--bad);font-weight:750}.statusline.ok{color:var(--good);font-weight:700}
+.bottom-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.bottom-actions button{flex:1}.hint{font-size:12px;color:var(--muted);margin-top:10px}.admin-toggle{font-size:11px;opacity:.88;padding:7px 9px;border:1px solid #ffffff55;background:#ffffff10;color:white}.hidden{display:none!important}
+#scannerModal{position:fixed;inset:0;background:#06111ee8;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}.modal-card{width:min(100%,520px);background:var(--card);color:var(--text);padding:16px;border-radius:18px}.modal-card h2{margin:0 0 10px;font-size:18px}#reader{width:100%;overflow:hidden;border-radius:12px;background:#000;min-height:220px}#reader video{object-fit:cover}.modal-actions{display:flex;gap:8px;margin-top:12px}.modal-actions button{flex:1}.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:200;background:var(--navy);color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);max-width:calc(100% - 30px);font-size:13px;text-align:center}.toast.bad{background:#a91e25}.toast.good{background:#126b4b}.footer{text-align:center;color:var(--muted);font-size:11px;padding:4px 0 14px}
+@media(max-width:760px){header{padding:13px 14px}.brand h1{font-size:16px}.clock{display:none}main{margin:12px auto;padding:0 10px 30px}.panel{padding:13px;border-radius:15px}.entry-grid{grid-template-columns:1fr 1fr}.entry-grid .field:nth-child(3),.entry-grid .field:nth-child(4){margin-top:2px}.stats{gap:6px}.stat{padding:9px}.stat strong{font-size:18px}.toolbar button{flex:0 0 auto}.province-field{flex-basis:100%}.bottom-actions{position:sticky;bottom:8px;z-index:30;background:var(--card);padding:9px;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}.bottom-actions button{padding:12px 8px;font-size:13px}.entry{padding:10px}.top-actions{gap:5px}.admin-toggle{font-size:10px;padding:7px}}
+@media(max-width:370px){.entry-grid{grid-template-columns:1fr}.brand p{display:none}.bottom-actions{flex-wrap:wrap}.bottom-actions button{flex-basis:45%}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+<header><div class="top">
+ <div class="brand"><div class="logo">QR</div><div><h1>SPX • QR Data Entry</h1><p>Quét mã · Tra cứu Ward · Xuất Excel</p></div></div>
+ <div class="top-actions"><span id="clock" class="clock">--:--:--</span><button id="themeBtn" class="soft small" aria-label="Đổi giao diện">☾</button><button id="adminBtn" class="admin-toggle">↑ DATA</button></div>
+</div></header>
+<main>
+<section class="panel">
+ <div class="panel-head"><div><h2>1. Chọn khu vực & dữ liệu</h2><p class="sub">Ward, Hub Name và Sort Code được tra cứu từ bảng DATA.</p></div><span id="dataStatus" class="data-status">Đang tải DATA…</span></div>
+ <div class="toolbar"><div class="field province-field"><label for="province">TỈNH / THÀNH PHỐ</label><select id="province"><option value="">Tất cả tỉnh</option></select></div><button id="reloadDataBtn" class="soft">↻ Tải lại DATA</button><button id="installBtn" class="soft hidden">＋ Cài ứng dụng</button></div>
+ <div class="stats"><div class="stat"><strong id="rowCount">0</strong><span>DÒNG NHẬP</span></div><div class="stat"><strong id="validCount">0</strong><span>ĐÃ TRA CỨU</span></div><div class="stat"><strong id="duplicateCount">0</strong><span>MÃ TRÙNG</span></div></div>
+ <p class="hint">DATA ban đầu được lấy từ tệp Excel đã cung cấp. Dùng nút <b>↑ DATA</b> để thay bằng tệp Excel mới có 4 cột: Tỉnh, Ward, Deli station, Sort code.</p>
+</section>
+<section class="panel">
+ <div class="panel-head"><div><h2>2. Nhập mã vận đơn</h2><p class="sub">Quét QR bằng camera hoặc nhập/dán mã. Không giới hạn số dòng.</p></div><button id="addRowBtn" class="primary">＋ Thêm hàng</button></div>
+ <div id="entries" class="rows"></div>
+ <p class="hint">Mẹo: sau khi quét thành công, ứng dụng tự chuyển đến dòng tiếp theo. Cần cho phép trình duyệt truy cập camera. Dữ liệu nhập được lưu tạm trên thiết bị này.</p>
+</section>
+<div class="bottom-actions">
+ <button id="addBottomBtn" class="soft">＋ Thêm hàng</button>
+ <button id="shareBtn" class="secondary">↗ Chia sẻ</button>
+ <button id="finishBtn" class="primary">✓ Xong · Xuất Excel</button>
+</div>
+<p class="footer">SPX QR Data Entry · PWA · Dữ liệu được xử lý trên thiết bị</p>
+</main>
+<div id="scannerModal" class="hidden" role="dialog" aria-modal="true" aria-label="Quét mã QR"><div class="modal-card"><h2>Quét mã QR</h2><p class="sub">Đưa mã QR vào khung hình. Giữ điện thoại ổn định và đủ ánh sáng.</p><div id="reader"></div><div id="scanMessage" class="statusline">Đang chuẩn bị camera…</div><div class="modal-actions"><button id="switchCameraBtn" class="soft">↻ Đổi camera</button><button id="closeScannerBtn" class="secondary">Đóng</button></div></div></div>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<input type="file" id="dataFile" accept=".xlsx,.xls,.csv" class="hidden">
+<script src="./app.js"></script>
+</body></html>
