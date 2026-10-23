@@ -1,5 +1,30 @@
-const CACHE='spx-qr-pwa-v1';
-const CORE=['./','./index.html','./app.js','./data.json','./manifest.json','./icon.svg'];
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()));});
-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
-self.addEventListener('fetch',event=>{const req=event.request;const url=new URL(req.url);if(req.method!=='GET'||url.origin!==location.origin)return;event.respondWith(caches.match(req).then(cached=>cached||fetch(req).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(req,copy));}return res;}).catch(()=>caches.match('./index.html'))));});
+const V = 'spx-scan-v3';
+const SHELL = ['./', 'index.html', 'manifest.json', 'data.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'];
+const EXTRA = [
+  'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap'
+];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(V).then(async c => {
+    await c.addAll(SHELL);
+    await Promise.all(EXTRA.map(u => c.add(u).catch(() => {})));
+  }));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  const own = url.origin === location.origin;
+  const fresh = own && (url.pathname.endsWith('data.json') || url.pathname.endsWith('index.html') || url.pathname.endsWith('/'));
+  const put = r => { if (r && (r.ok || r.type === 'opaque')) { const cp = r.clone(); caches.open(V).then(c => c.put(e.request, cp)); } return r; };
+  if (fresh) { // ưu tiên mạng, mất mạng thì dùng cache
+    e.respondWith(fetch(e.request).then(put).catch(() => caches.match(e.request, { ignoreSearch: true })));
+  } else {     // ưu tiên cache (thư viện, font, icon)
+    e.respondWith(caches.match(e.request, { ignoreSearch: own }).then(m => m || fetch(e.request).then(put)));
+  }
+});
